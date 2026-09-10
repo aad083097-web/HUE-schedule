@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>校园地图访问统计</title>
+  <style>
+    :root{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","PingFang SC",sans-serif;color:#17233c;background:#f4f7fb}
+    body{margin:0;padding:28px}main{max-width:980px;margin:auto}.head{display:flex;justify-content:space-between;align-items:end;margin-bottom:22px}h1{margin:0;font-size:28px}small{color:#71809a}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}.card,section{background:#fff;border:1px solid #e4eaf3;border-radius:18px;padding:18px;box-shadow:0 8px 24px #22345b0b}.label{color:#71809a;font-size:13px}.value{font-size:30px;font-weight:750;margin-top:8px}.unit{font-size:13px;color:#71809a;font-weight:500}section{margin-top:16px}h2{font-size:17px;margin:0 0 14px}table{width:100%;border-collapse:collapse;font-size:14px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid #edf1f6}th{color:#71809a;font-weight:600}
+    @media(max-width:650px){body{padding:15px}.grid{grid-template-columns:1fr 1fr}.card:last-child{grid-column:span 2}.head{display:block}h1{font-size:24px}table{font-size:12px;display:block;overflow:auto;white-space:nowrap}}
+    .hidden-row{display:none}
+    .toggle-btn{margin-top:12px;padding:8px 18px;background:#f0f4fa;border:1px solid #d8e0ec;border-radius:10px;color:#4a5a75;font-size:13px;cursor:pointer;transition:all .2s}
+    .toggle-btn:hover{background:#e4ebf5;color:#2c3e5a}
+  </style>
+</head>
+<body><main>
+  <div class="head"><div><h1>校园地图访问统计</h1><small>map.suyu.ink · 公开统计 · IP 已哈希</small></div><small>最后访问：{{ summary.latest or '暂无' }}</small></div>
+  <div class="grid">
+    <div class="card"><div class="label">页面打开总次数</div><div class="value">{{ summary.total_opens }} <span class="unit">次</span></div></div>
+    <div class="card"><div class="label">去重访客数</div><div class="value">{{ summary.unique_visitors }} <span class="unit">人</span></div></div>
+    <div class="card"><div class="label">最近访问</div><div class="value" style="font-size:16px;margin-top:14px">{{ summary.latest or '暂无' }}</div></div>
+  </div>
+  <section><h2>设备分布</h2><table><tr><th>类型</th><th>设备</th><th>系统</th><th>浏览器</th><th>次数</th></tr>{% for row in devices %}<tr><td>{{ row.device_type }}</td><td>{{ row.device_model }}</td><td>{{ row.os_name }}</td><td>{{ row.browser }}</td><td>{{ row.count }}</td></tr>{% else %}<tr><td colspan="5">暂无数据</td></tr>{% endfor %}</table></section>
+  <section><h2>去重访客明细</h2><table id="visitorTable"><tr><th>访客标识</th><th>访问次数</th><th>首次</th><th>最近</th><th>设备</th><th>系统</th><th>浏览器</th></tr>{% for row in visitors %}<tr class="{% if loop.index > 50 %}hidden-row{% endif %}"><td>{{ row.visitor }}</td><td>{{ row.count }}</td><td>{{ row.first_seen }}</td><td>{{ row.latest }}</td><td>{{ row.device_model }}</td><td>{{ row.os_name }}</td><td>{{ row.browser }}</td></tr>{% else %}<tr><td colspan="7">暂无数据</td></tr>{% endfor %}</table>{% if visitors|length > 50 %}<button class="toggle-btn" onclick="toggleTable('visitorTable', this)">查看全部 {{ visitors|length }} 条</button>{% endif %}</section>
+  <section><h2>最近访问日志</h2><table id="viewsTable"><tr><th>时间</th><th>访客标识</th><th>设备</th><th>系统</th><th>浏览器</th><th>页面</th><th>来源</th></tr>{% for row in views %}<tr class="{% if loop.index > 50 %}hidden-row{% endif %}"><td>{{ row.created_at }}</td><td>{{ row.visitor }}</td><td>{{ row.device_model }}</td><td>{{ row.os_name }}</td><td>{{ row.browser }}</td><td>{{ row.page or '-' }}</td><td>{{ row.referrer or '-' }}</td></tr>{% else %}<tr><td colspan="7">暂无数据</td></tr>{% endfor %}</table>{% if views|length > 50 %}<button class="toggle-btn" onclick="toggleTable('viewsTable', this)">查看全部 {{ views|length }} 条</button>{% endif %}</section>
+</main>
+<script>
+function toggleTable(tableId, btn) {
+  const table = document.getElementById(tableId);
+  const hiddenRows = table.querySelectorAll('.hidden-row');
+  const isExpanded = btn.dataset.expanded === 'true';
+  hiddenRows.forEach(row => {
+    row.style.display = isExpanded ? 'none' : '';
+  });
+  btn.dataset.expanded = isExpanded ? 'false' : 'true';
+  btn.textContent = isExpanded ? btn.textContent.replace('收起', '查看全部') : btn.textContent.replace('查看全部', '收起');
+}
+</script>
+</body></html>

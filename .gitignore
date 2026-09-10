@@ -1,0 +1,8 @@
+users.db
+*.db-*
+*.log
+.env
+__pycache__/
+backups/
+.DS_Store
+
